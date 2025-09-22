@@ -36,10 +36,10 @@ const Hero = () => {
           {/* Main Heading */}
           <motion.h1
             variants={textVariants}
-            className="text-4xl sm:text-6xl lg:text-7xl font-bold text-white"
+            className="text-4xl sm:text-6xl lg:text-7xl font-bold text-white leading-tight"
           >
             <span className="block">Innovative</span>
-            <span className="block bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            <span className="block gradient-text-safe">
               Technology Solutions
             </span>
           </motion.h1>
