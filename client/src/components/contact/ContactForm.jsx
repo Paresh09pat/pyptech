@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiSend } from 'react-icons/fi';
+import { FiSend, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
+import emailjs from '@emailjs/browser';
+import { EMAILJS_CONFIG } from '../../config/emailjs';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +11,9 @@ const ContactForm = () => {
     subject: '',
     message: ''
   });
+  
+  const [isLoading, setIsLoading] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null); // 'success', 'error', null
 
   const handleChange = (e) => {
     setFormData({
@@ -17,10 +22,37 @@ const ContactForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
+    setIsLoading(true);
+    setSubmitStatus(null);
+
+    try {
+      // Prepare template parameters
+      const templateParams = {
+        from_name: formData.name,
+        from_email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+        to_email: EMAILJS_CONFIG.TO_EMAIL
+      };
+
+      // Send email using EmailJS
+      await emailjs.send(
+        EMAILJS_CONFIG.SERVICE_ID,
+        EMAILJS_CONFIG.TEMPLATE_ID,
+        templateParams,
+        EMAILJS_CONFIG.PUBLIC_KEY
+      );
+      
+      setSubmitStatus('success');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      console.error('EmailJS Error:', error);
+      setSubmitStatus('error');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -96,14 +128,51 @@ const ContactForm = () => {
           />
         </div>
         
+        {/* Success/Error Messages */}
+        {submitStatus === 'success' && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center p-4 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-lg"
+          >
+            <FiCheckCircle className="mr-2" />
+            Message sent successfully! We'll get back to you soon.
+          </motion.div>
+        )}
+        
+        {submitStatus === 'error' && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center p-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-lg"
+          >
+            <FiAlertCircle className="mr-2" />
+            Failed to send message. Please try again or contact us directly.
+          </motion.div>
+        )}
+
         <motion.button
           type="submit"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="w-full flex items-center justify-center px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-300"
+          disabled={isLoading}
+          whileHover={!isLoading ? { scale: 1.05 } : {}}
+          whileTap={!isLoading ? { scale: 0.95 } : {}}
+          className={`w-full flex items-center justify-center px-8 py-4 font-semibold rounded-lg transition-colors duration-300 ${
+            isLoading 
+              ? 'bg-gray-400 cursor-not-allowed text-gray-600' 
+              : 'bg-blue-600 hover:bg-blue-700 text-white'
+          }`}
         >
-          <FiSend className="mr-2" />
-          Send Message
+          {isLoading ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+              Sending...
+            </>
+          ) : (
+            <>
+              <FiSend className="mr-2" />
+              Send Message
+            </>
+          )}
         </motion.button>
       </form>
     </motion.div>

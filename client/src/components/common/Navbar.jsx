@@ -70,7 +70,7 @@ const Navbar = () => {
                 )}
               </Link>
             ))}
-            <ThemeToggle />
+            {/* <ThemeToggle /> */}
           </div>
 
           {/* Mobile menu button */}

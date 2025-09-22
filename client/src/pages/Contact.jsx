@@ -34,7 +34,7 @@ const Contact = () => {
         </div>
       </section>
 
-      <MapSection />
+      {/* <MapSection /> */}
     </div>
   );
 };
